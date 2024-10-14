@@ -1,0 +1,202 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+.filter-bar {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+input[type="text"] {
+    padding: 10px;
+    width: 300px;
+}
+
+select {
+    padding: 10px;
+}
+
+#bookList, #wishlistBooks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.book-item {
+    position: relative;
+    border: 1px solid #ddd;
+    padding: 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    border-radius: 5px;
+}
+.book-item:hover{
+    margin-top: -10px;
+    margin-bottom: 10px;
+    transition: all .2s ease-in-out;
+}
+
+.book-item.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.love-icon {
+    font-size: 2rem;
+    color: red;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.love-icon.saved {
+    color: red;
+    transform: scale(1.2);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 15px;
+}
+
+h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px;
+    color: #555;
+}
+
+.book-details {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+}
+
+.book-details img {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+#pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination-button {
+    background-color: #ddd;
+    border: none;
+    padding: 10px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.pagination-button.active {
+    background-color: #333;
+    color: white;
+}
+
+.pagination-button:hover {
+    background-color: #555;
+    color: white;
+}
+
+
+
+img{
+    height: 282px;
+    object-fit: contain;
+}
+
+a{
+    /* text-decoration: none; */
+    color: inherit;
+}
+
+.links{
+    list-style: none;
+    border: 1px solid #555;
+    padding: 5px 10px;
+    width: fit-content;
+    margin: 10px 0px;
+    border-radius: 5px;
+    background: rgb(130, 254, 254);
+    cursor: pointer;
+}
+.links:hover{
+    background: cyan;
+    color: white;
+}
+
+/* Skeleton loader */
+.skeleton {
+    background-color: #ddd;
+    border-radius: 5px;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-color: #ddd;
+    }
+    50% {
+        background-color: #eaeaea;
+    }
+    100% {
+        background-color: #ddd;
+    }
+}
+
+.skeleton-img {
+    height: 282px;
+    margin-bottom: 15px;
+}
+
+.skeleton-title, .skeleton-author {
+    width: 80%;
+    height: 20px;
+    margin: 10px auto;
+}
+
+.skeleton-author {
+    width: 60%;
+    margin-top: 5px;
+}
