@@ -85,7 +85,7 @@ function displayBooks() {
     // Animate book display
     bookList.innerHTML = ''; // Clear the list first
     paginatedBooks.forEach(book => {
-        const bookGenres = extractGenres(book.subjects);  // Ensure this is done within the loop
+        const bookGenres = extractGenres(book.subjects); 
         const bookItem = document.createElement('div');
         bookItem.className = 'book-item';
         bookItem.dataset.id = book.id;
