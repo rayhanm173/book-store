@@ -4,14 +4,22 @@ let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 let savedSearchTerm = localStorage.getItem('searchTerm') || '';
 let savedGenre = localStorage.getItem('genre') || 'all';
 
-const genreKeywords = ["Fiction", "Drama", "Poetry", "Humor", "Political Science", "African Americans"];
-
-// Function to extract genres from subjects
+// Function to extract genres from subjects and remove duplicates and "--"
 function extractGenres(subjects) {
-    return subjects.filter(subject => {
-        // Check if the subject contains any of the keywords defined above
-        return genreKeywords.some(genre => subject.toLowerCase().includes(genre.toLowerCase()));
+    const uniqueGenres = new Set();
+
+    subjects.forEach(subject => {
+        // Remove "--" and extra spaces
+        const cleanedSubject = subject.replace(/--/g, "").trim();
+        
+        // Split the subject by commas and add each part to the set
+        cleanedSubject.split(',').forEach(subPart => {
+            uniqueGenres.add(subPart.trim());
+        });
     });
+
+    // Return the genres as a comma-separated string
+    return Array.from(uniqueGenres).join(', ');
 }
 
 // Pagination variables
@@ -33,7 +41,7 @@ genreFilter.value = savedGenre;
 function showSkeletonLoaders() {
     bookList.innerHTML = ''; // Clear any existing content
 
-    // Create 10 skeleton loader items
+    // Create 3 skeleton loader items
     for (let i = 0; i < 10; i++) {
         const skeletonItem = document.createElement('div');
         skeletonItem.className = 'book-item';
@@ -56,7 +64,7 @@ async function fetchBooks() {
     const response = await fetch(`${API_URL}`);
     const data = await response.json();
     books = data.results;
-
+    
     displayBooks();
     setupPagination();
 }
@@ -64,16 +72,13 @@ async function fetchBooks() {
 // Display Books with pagination and filtering logic
 function displayBooks() {
     const searchTerm = searchInput.value.toLowerCase();
-    const selectedGenre = genreFilter.value.toLowerCase();
+    const selectedGenre = genreFilter.value;
 
     const filteredBooks = books.filter(book => {
         const matchesSearch = book.title.toLowerCase().includes(searchTerm);
         const bookGenres = extractGenres(book.subjects);  // Extract genres for each book
-
-        // Genre filtering logic
         const matchesGenre = selectedGenre === 'all' || 
-            bookGenres.some(genre => genre.toLowerCase().includes(selectedGenre));
-
+            bookGenres.toLowerCase().includes(selectedGenre.toLowerCase());
         return matchesSearch && matchesGenre;
     });
 
@@ -85,10 +90,11 @@ function displayBooks() {
     // Animate book display
     bookList.innerHTML = ''; // Clear the list first
     paginatedBooks.forEach(book => {
-        const bookGenres = extractGenres(book.subjects); 
         const bookItem = document.createElement('div');
         bookItem.className = 'book-item';
         bookItem.dataset.id = book.id;
+
+        const bookGenres = extractGenres(book.subjects);  // Extract genres again for display
 
         bookItem.innerHTML = `
             <a href="book.html?id=${book.id}">
@@ -96,7 +102,7 @@ function displayBooks() {
                 <h3 class='book-title'>${book.id}. ${book.title}</h3>
             </a>
             <p>Author: ${book.authors.map(author => author.name).join(', ')}</p>
-            <p>Genre: ${bookGenres.join(', ')}</p>
+            <p>Genre: ${bookGenres}</p>
             <span class="love-icon ${wishlist.includes(book.id) ? 'fas' : 'far'} fa-heart" 
                   onclick="toggleWishlist(${book.id}, this)"></span>
         `;
@@ -114,16 +120,7 @@ function displayBooks() {
 
 // Setup pagination buttons
 function setupPagination() {
-    const filteredBooks = books.filter(book => {
-        const selectedGenre = genreFilter.value.toLowerCase();
-        const bookGenres = extractGenres(book.subjects);
-        const matchesGenre = selectedGenre === 'all' || 
-            bookGenres.some(genre => genre.toLowerCase().includes(selectedGenre));
-
-        return matchesGenre;
-    });
-
-    const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
+    const totalPages = Math.ceil(books.length / booksPerPage);
     paginationDiv.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
@@ -218,7 +215,7 @@ function displayWishlist() {
 function removeFromWishlist(bookId, iconElement) {
     wishlist = wishlist.filter(id => id !== bookId);
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
+    
     // Remove the book item from the wishlist display with animation
     const bookItem = iconElement.closest('.book-item');
     bookItem.classList.add('hidden');
