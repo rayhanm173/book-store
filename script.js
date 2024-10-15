@@ -4,6 +4,16 @@ let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 let savedSearchTerm = localStorage.getItem('searchTerm') || '';
 let savedGenre = localStorage.getItem('genre') || 'all';
 
+const genreKeywords = ["Fiction", "Drama", "Poetry", "Humor", "Political Science", "African Americans"];
+
+// Function to extract genres from subjects
+function extractGenres(subjects) {
+    return subjects.filter(subject => {
+        // Check if the subject contains any of the keywords defined above
+        return genreKeywords.some(genre => subject.toLowerCase().includes(genre.toLowerCase()));
+    });
+}
+
 // Pagination variables
 let currentPage = 1;
 const booksPerPage = 10;
@@ -19,12 +29,11 @@ const genreFilter = document.getElementById('genreFilter');
 searchInput.value = savedSearchTerm;
 genreFilter.value = savedGenre;
 
-
 // Function to show skeleton loaders
 function showSkeletonLoaders() {
     bookList.innerHTML = ''; // Clear any existing content
 
-    // Create 3 skeleton loader items
+    // Create 10 skeleton loader items
     for (let i = 0; i < 10; i++) {
         const skeletonItem = document.createElement('div');
         skeletonItem.className = 'book-item';
@@ -39,31 +48,32 @@ function showSkeletonLoaders() {
     }
 }
 
-
 // Fetch Books
 async function fetchBooks() {
-
     // Show skeleton loaders before fetching the books
     showSkeletonLoaders();
 
     const response = await fetch(`${API_URL}`);
     const data = await response.json();
     books = data.results;
-    
+
     displayBooks();
     setupPagination();
 }
 
-
-
 // Display Books with pagination and filtering logic
 function displayBooks() {
     const searchTerm = searchInput.value.toLowerCase();
-    const selectedGenre = genreFilter.value;
+    const selectedGenre = genreFilter.value.toLowerCase();
 
     const filteredBooks = books.filter(book => {
         const matchesSearch = book.title.toLowerCase().includes(searchTerm);
-        const matchesGenre = selectedGenre === 'all' || book.subjects.some(subject => subject.toLowerCase().includes(selectedGenre));
+        const bookGenres = extractGenres(book.subjects);  // Extract genres for each book
+
+        // Genre filtering logic
+        const matchesGenre = selectedGenre === 'all' || 
+            bookGenres.some(genre => genre.toLowerCase().includes(selectedGenre));
+
         return matchesSearch && matchesGenre;
     });
 
@@ -75,6 +85,7 @@ function displayBooks() {
     // Animate book display
     bookList.innerHTML = ''; // Clear the list first
     paginatedBooks.forEach(book => {
+        const bookGenres = extractGenres(book.subjects);  // Ensure this is done within the loop
         const bookItem = document.createElement('div');
         bookItem.className = 'book-item';
         bookItem.dataset.id = book.id;
@@ -82,9 +93,10 @@ function displayBooks() {
         bookItem.innerHTML = `
             <a href="book.html?id=${book.id}">
                 <img src="${book.formats['image/jpeg']}" alt="${book.title}">
-                <h3 class='book-title'>${book.title}</h3>
+                <h3 class='book-title'>${book.id}. ${book.title}</h3>
             </a>
             <p>Author: ${book.authors.map(author => author.name).join(', ')}</p>
+            <p>Genre: ${bookGenres.join(', ')}</p>
             <span class="love-icon ${wishlist.includes(book.id) ? 'fas' : 'far'} fa-heart" 
                   onclick="toggleWishlist(${book.id}, this)"></span>
         `;
@@ -102,7 +114,16 @@ function displayBooks() {
 
 // Setup pagination buttons
 function setupPagination() {
-    const totalPages = Math.ceil(books.length / booksPerPage);
+    const filteredBooks = books.filter(book => {
+        const selectedGenre = genreFilter.value.toLowerCase();
+        const bookGenres = extractGenres(book.subjects);
+        const matchesGenre = selectedGenre === 'all' || 
+            bookGenres.some(genre => genre.toLowerCase().includes(selectedGenre));
+
+        return matchesGenre;
+    });
+
+    const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
     paginationDiv.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
@@ -197,7 +218,7 @@ function displayWishlist() {
 function removeFromWishlist(bookId, iconElement) {
     wishlist = wishlist.filter(id => id !== bookId);
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    
+
     // Remove the book item from the wishlist display with animation
     const bookItem = iconElement.closest('.book-item');
     bookItem.classList.add('hidden');
